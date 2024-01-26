@@ -1,0 +1,86 @@
+# PanCan_scMetab
+Code for pan-cancer analysis of metabolic gene expression patterns using scRNA-seq data
+
+
+- 00_reproduce:
+    - 00_Prepare_data.R: Prepare seurat object
+        - if CD3>0, CD4>0, CD8=0: CD4+ T; if CD3>0, CD4=0, CD8>0: CD8+ T;
+    - 01_All_Gene_TpN_Clustering.R: All gene based clustering
+    - 02_Cell_Proportion.R: Plot sample counts, cell counts and celltype proportion
+- 01_clustering:
+    - 01_MetabGene_based_clustering.R: Clustering on metabolic genes
+    - 02_MetabGene_clustering_Epi_vs_NonEpi.R: Same as above, split epi and non-epi for BRCA
+    - 03_PAS_based_clustering.R: Pathway score based clustering
+    - 04_Identify_celltype_markers_v2.R: identify cell type markers
+        - Gene marker: padj<0.01, log2FC>0.1, pct.1>0.1 | pct.2>0.1
+        - Pathway marker: padj<0.01, log2FC>0.01, pct.1>0.1 | pct.2>0.1
+        - Regulon marker: padj<0.01, log2FC>0.01, pct.1>0.1 | pct.2>0.1
+    - 05_MetabGene_PCA_correlation.R: PCA based metabolic similarity
+        - 500 pairs of cells, 30 PCs
+    - 06_All_dataset_merged.R: All datasets merged clustering
+    - 07_Celltype_Pred_glm.R: xx
+        - samples were dividing into train and test, then each sample 10000 cells
+        - 10-folds & lasso & logistic 
+    - 08_ROGUE_index.R: xx
+    - 09_SOD3_LDHB_VlnPlot.R: xx
+- 02_SCENIC:
+    - 01_SCENIC_prepare_TpN.R: Prepare data for SCENIC
+    - 02_prepare_celltype_gmt.R: Prepare gmt file
+    - 03_pyscenic.sh: Run pyscenic using singularity in server
+    - 04_motif2regulon.ipynb: convert motifs (output of pyscenic) to regulons
+    - 05_regulons_clean.R: Clean regulons
+    - 06_pySCENIC_AUCell.sh: Run aucell using singularity in server
+- 03_NMF:
+    - 00_server_score_MP.R: Score cells for MMP in server
+    - 00_tools_custom_magma.R: color function from Gavish et. al.
+    - 00_tools_robust_nmf_programs.R: function to identify robust nmf programs from Gavish et. al.
+    - 00_tools_run_NMF.R: run NMF in server
+    - 00_tools_score_cor_heatmap.R: Correlation heatmap, dataset splited
+    - 00_tools_score_cor_heatmap_TF.R: Correlation heatmap, TFs may not identified in all samples
+    - 00_tools_score_cor_pooled_heatmap.R: Correlation heatmap, pooled for all datasets
+    - 01_prepare_NMF.R: Prepare metabolic gene expression, sample info, log2(cpm/10+1), Genes_nmf_w_basis data;
+        - Normalize -> scale, nCells > 20, top 500 metabolic genes, expr[expr<0]=0
+        - NMF K: 4-9, nrun = 10, method = "snmf/r"
+    - 02_Generate_Meta_Programs.R: Generate MMPs from nmf programs
+        - MMP size: 30; intra_min: 21; intra_max: 6; inter_min: 6; min_intersect: 6; min_group: 10;
+    - 02_Post-Ident_Anno_and_Plot.R: Annotate MMPs, plot Jaccard index, ...
+    - 03_MP_abundance_across_tumorType.R: MMP context specificity
+        - A = log2((observed + 1)/(expected + 1))
+        - observed>10, A>1:
+            - padj<0.05: High_significant
+            - padj>0.05: High
+        - (2 <= observed <= 10) | (0 < A <= 1): Medium
+        - (observed = 1) & (-1.5 < A <= 0): Low
+        - Other: Absent
+    - 04_MP_distribution_across_cells.R: plot MMP scores for each cells
+    - 05_MP_gene_expr_heatmap.R: Plot gene expression heatmap for each MMPs in each tumor
+    - 06_MP_correlations_with_x.R: Plot MMPs correlations
+        - For TF: t test, BH adjusted, padj_both < 0.05, abs(R) > 0.4
+        - for each combination of dataset and MMP, top TF with highest R was kept; 
+    - 07_MP_expr_vs_variability.R: Expression vs variablity
+    - 08_MP_drugs.R: Drug sensitivity
+        - xxxx
+    - 09_ST_valid.R: ST data
+        - data from xxx; 
+    - 10_COAD_Metastasis.R: COAD MMP7 and metastasis, not significant, not used
+    - plot_fig5A_pie.R: fig 5A pie
+- 04_TvN:
+    - 01_TvN_DE_per_dataset.R: Identify TvN markers
+    - 02_TvN_plot_v2.R: Plot TvN markers
+    - 03_PanCan_correaltion_TvN.R: Metabolic similarity TvN
+    - 04_TCGA_TvN_v2.R: TCGA TvN
+    - 05_correaltion_with_TCGA.R: Correlation between single cell and TCGA
+    - 06_plot_TvN_VlnPlot.R: Violin plot for specific genes
+- 05_epi:
+    - 01_inter_sample_correlation_v2.R: Inter sample heterogeneity and associated factors
+    - 02_BRCA_COAD_subtype.R: Tumor subtypes and metabolic heterogeneity
+    - 03_CCLE_BRCA_subtype.R: validate subtype difference using CCLE data
+    - 04_Identify_Imp_TF_for_Malig_v2.R: filter TF for validation
+    - 05_TF_RNAseq: TF RNA-seq
+    - 06_TF_metabolomics.R: TF metbabolomics
+    - 07_plot_OXPHOS_Glycolysis.R: plot serveral pathway
+- 06_TME:
+    - 01_Ridge_plot_for_Imp_Genes.R: Ridge plot
+    - MMPs_network.R: MMPs network
+
+
